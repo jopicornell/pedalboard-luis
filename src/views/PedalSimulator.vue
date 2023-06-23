@@ -34,6 +34,14 @@ const handleButtonClick = (index: number) => {
   if (button.type === "trigger") {
     pedalMidiOutput.value?.channels[button.channel].sendControlChange(button.controller, 127)
   }
+  if (button.type === 'program') {
+    pedalMidiOutput.value?.channels[button.channel].sendProgramChange(button.controller)
+    banks[selectedBankIndex.value].buttons.forEach((buttonFiltered, index) => {
+      if (buttonFiltered.type === 'program') {
+        banks[selectedBankIndex.value].buttons[index].enabled = button === buttonFiltered
+      }
+    })
+  }
   if (button.type === "returnToPreviousBank") {
     if (selectedBankIndex.value === 0) {
       selectedBankIndex.value = previousBankIndex.value
@@ -135,7 +143,7 @@ onPedalEvent((event) => {
         </select>
       </div>
 
-      <button class="config-icon" @click="handleConfigButtonClick">Config</button>
+      <button class="config-icon">Config</button>
     </div>
     <div class="preset-bar flex justify-center items-center h-16 mb-4 text-4xl">{{ selectedBank.name }}</div>
     <div class="grid-layout flex grid grid-cols-6 gap-4 p-4">
