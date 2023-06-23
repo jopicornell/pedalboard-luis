@@ -19,6 +19,8 @@ export default defineConfig(async ({mode}): Promise<UserConfig> => {
                 short_name: 'Pedalboard',
                 description: 'A pedalboard middleware for connecting midi controllers and DAWs to the Uno2',
                 theme_color: '#',
+                start_url: '/?standalone=true',
+                display: 'standalone',
                 icons: [
                     {
                         src: 'pwa-192x192.png',
