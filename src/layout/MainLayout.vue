@@ -46,7 +46,7 @@ const pedalBoardClasses = ref({
                 Simulator
             </SideBarOption>
             <SideBarOption icon="clipboard" @click="exportFcb">
-                UnO2 To Clipboard
+                UnO2 to clipboard
             </SideBarOption>
             <hr class="border-gray-400"/>
             <SideBarOption icon="cog" @click="configModal?.open()">
