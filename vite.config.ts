@@ -1,6 +1,7 @@
 import {defineConfig, loadEnv, UserConfig} from 'vite'
 import vue from '@vitejs/plugin-vue'
 import {internalIpV4} from 'internal-ip';
+import { VitePWA } from 'vite-plugin-pwa'
 // https://vitejs.dev/config/
 export default defineConfig(async ({mode}): Promise<UserConfig> => {
     const env = loadEnv(mode, process.cwd())
@@ -8,7 +9,30 @@ export default defineConfig(async ({mode}): Promise<UserConfig> => {
     const host = await internalIpV4()
 
     return {
-        plugins: [vue()],
+        plugins: [vue(), VitePWA({
+            registerType: 'autoUpdate',
+            includeManifestIcons: true,
+            injectRegister: 'auto',
+            includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png', 'masked-icon-512x512.svg'],
+            manifest: {
+                name: 'Pedalboard Middleware',
+                short_name: 'Pedalboard',
+                description: 'A pedalboard middleware for connecting midi controllers and DAWs to the Uno2',
+                theme_color: '#',
+                icons: [
+                    {
+                        src: 'pwa-192x192.png',
+                        sizes: '192x192',
+                        type: 'image/png'
+                    },
+                    {
+                        src: 'pwa-512x512.png',
+                        sizes: '512x512',
+                        type: 'image/png'
+                    }
+                ]
+            }
+        })],
         // prevent vite from obscuring rust errors
         clearScreen: false,
         // Tauri expects a fixed port, fail if that port is not available
