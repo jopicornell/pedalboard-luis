@@ -1,21 +1,19 @@
 <script setup lang="ts">
-import {Ref, ref} from "vue";
+import {ref} from "vue";
 import ConfigModal from "../components/ConfigModal.vue";
 import SideBar from "../components/SideBar.vue";
 import SideBarOption from "../components/SideBarOption.vue";
 import {useFcbPedal} from "../composables/useFcbPedal";
-import {useMidi} from "../composables/useMidi";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {Button} from "../types/Button";
-import {Input, Output} from "webmidi";
-
-const {pedalMidiOutput, pedalMidiInput} = useMidi()
+import {useRouter} from "vue-router";
 
 const {
     exportFcb,
     banks,
     hasDirectBank
-} = useFcbPedal(pedalMidiInput as Ref<Input | null>, pedalMidiOutput as Ref<Output | null>)
+} = useFcbPedal(ref(null), ref(null))
+const router = useRouter()
 
 const configModal = ref<InstanceType<typeof ConfigModal> | null>(null)
 
@@ -24,14 +22,21 @@ const openedSideBar = ref(false)
 const pedalBoardClasses = ref({
     'pedal-board--side-bar-open': openedSideBar
 })
+
+function goToSimulator() {
+    router.push({name: "PedalSimulator"})
+}
+
+function toggleSideBar() {
+    openedSideBar.value = !openedSideBar.value
+}
 </script>
 
 <template>
     <div class="pedal-board" :class="pedalBoardClasses">
-
         <div class="preset-bar grid grid-cols-[1fr_auto] p-8">
             <slot name="top-bar"></slot>
-            <button class="config-icon justify-self-end self-start" @click="openedSideBar = !openedSideBar">
+            <button class="config-icon justify-self-end self-start" @click="toggleSideBar">
                 <font-awesome-icon size="xl" icon="fa-solid fa-bars"/>
             </button>
         </div>
@@ -42,7 +47,7 @@ const pedalBoardClasses = ref({
             <SideBarOption icon="grip">
                 Pedal Board
             </SideBarOption>
-            <SideBarOption icon="vial-circle-check">
+            <SideBarOption icon="vial-circle-check" @click="goToSimulator">
                 Simulator
             </SideBarOption>
             <SideBarOption icon="clipboard" @click="exportFcb">

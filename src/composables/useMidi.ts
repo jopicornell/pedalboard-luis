@@ -1,12 +1,8 @@
 import type {Input, MessageEvent, Output} from 'webmidi';
 import {Message, WebMidi} from 'webmidi';
 import {onMounted, ref, watch} from 'vue';
-import {listMidiConnections} from '../utils/midi';
 import {MidiMessage, MidiMessageType} from "../types/MidiMessage";
 
-listMidiConnections().then((connections) => {
-    console.log(connections)
-})
 
 function getDawMidiInput(): Input | null {
 
@@ -18,11 +14,11 @@ function getDawMidiOutput(): Output | null {
 }
 
 function getPedalMidiInput(simulator: boolean): Input | null {
-    return WebMidi.getInputByName(simulator ? 'Virtual Midi Simulator Out' : 'Komplete Audio 6') || WebMidi.getInputByName('Virtual Midi Simulator In') || null;
+    return WebMidi.getInputByName(simulator ? 'Virtual Midi Simulator Out' : 'FootCtrl Bluetooth') || WebMidi.getInputByName('Virtual Midi Simulator In') || null;
 }
 
 function getPedalMidiOutput(simulator: boolean): Output | null {
-    return WebMidi.getOutputByName(simulator ? 'Virtual Midi Simulator In' : 'Komplete Audio 6') || WebMidi.getOutputByName('Virtual Midi Simulator Out') || null;
+    return WebMidi.getOutputByName(simulator ? 'Virtual Midi Simulator In' : 'FootCtrl Bluetooth') || WebMidi.getOutputByName('Virtual Midi Simulator Out') || null;
 }
 
 const pedalListeners = ref([] as ((message: MessageEvent) => void)[]);
@@ -58,9 +54,9 @@ watch(pedalMidiInput, (input, oldValue) => {
         pedalListeners.value.forEach((listener) => input.addListener('programchange', listener))
     }
 })
-export function useMidi(simulator: boolean = false) {
 
-    onMounted(async () => {
+export function useMidi() {
+    async function configureMidi(simulator: boolean = false) {
         await WebMidi.enable()
         if (!WebMidi.enabled) {
             console.error('WebMidi is not enabled')
@@ -76,13 +72,14 @@ export function useMidi(simulator: boolean = false) {
             pedalMidiInput.value = getPedalMidiInput(simulator)
             pedalMidiOutput.value = getPedalMidiOutput(simulator)
         }
-    })
+    }
 
     function onPedalEvent(listener: (event: MessageEvent) => void) {
         pedalListeners.value.push(listener)
     }
 
     function onDawEvent(listener: (event: MessageEvent) => void) {
+        console.log('adding daw listener')
         dawListeners.value.push(listener)
     }
 
@@ -108,6 +105,7 @@ export function useMidi(simulator: boolean = false) {
         dawMidiOutput,
         pedalMidiInput,
         pedalMidiOutput,
+        configureMidi,
         onPedalEvent,
         onDawEvent,
         getRawMidiMessage,

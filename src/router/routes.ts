@@ -9,6 +9,7 @@ export const router = createRouter({
     },
     {
       path: '/simulator',
+      name: 'PedalSimulator',
       component: () => import('../views/PedalSimulator.vue'),
     },
   ]

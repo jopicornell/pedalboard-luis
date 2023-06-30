@@ -1,13 +1,19 @@
 <script setup lang="ts">
 import {Sweep} from "../types/Sweep";
-import {computed} from "vue";
+import {computed, ref} from "vue";
+import {Button} from "../types/Button";
 
 
 interface Props {
     sweep?: Sweep
+    changeOnClick?: boolean
 }
 
 const props = defineProps<Props>()
+
+const emit = defineEmits<{
+    (event: 'update:sweepValue', value: number): void
+}>()
 
 // use props.sweep.max and props.sweep.min to calculate the percent
 const percent = computed(() =>
@@ -21,6 +27,26 @@ const sweepClasses = computed(() => {
         "bg-gray-800": props.sweep === undefined,
     }
 })
+
+const sweepButton = ref<HTMLButtonElement | null>(null)
+const mouseDown = ref(false)
+
+const handleSweepClick = (event: PointerEvent) => {
+
+    if (props.changeOnClick && props.sweep && mouseDown.value) {
+        const tolerance = 5
+        const height = sweepButton.value?.offsetHeight - tolerance * 2 || 0
+        const offset = event.layerY - tolerance
+        const percentValue = Math.max(Math.min((height - offset ) / height, 1), 0)
+        const value = percentValue * (props.sweep?.max - props.sweep?.min) + props.sweep?.min
+        emit('update:sweepValue', value)
+    }
+}
+
+function handleMouseDown(event: PointerEvent) {
+    mouseDown.value = true
+    handleSweepClick(event)
+}
 </script>
 
 <template>
@@ -42,12 +68,16 @@ const sweepClasses = computed(() => {
              dark:border-gray-700
              bg-gray-700"
             :class="sweepClasses"
+            ref="sweepButton"
+            @mousedown="handleMouseDown"
+            @mouseup="mouseDown = false"
+            @mousemove="handleSweepClick"
     >
         <div class="absolute top-0 bottom-0 left-0 right-0 flex flex-col items-center justify-center h-full">
             <div class="text-xs text-gray-100">{{ props.sweep?.name }}</div>
             <div class="text-xs text-gray-100">{{ percent !== null ? `${percent.toFixed(0)}%` : '' }}</div>
         </div>
-        <div v-if="sweep" class="bg-cyan-800 from-indigo-500 via-purple-500 to-pink-500 w-full rounded-lg px-5 py-2.5"
+        <div v-if="sweep" class="bg-cyan-800 from-indigo-500 via-purple-500 to-pink-500 w-full rounded-lg px-5"
              :style="percentStyle">
 
             <template v-if="$slots.default">
